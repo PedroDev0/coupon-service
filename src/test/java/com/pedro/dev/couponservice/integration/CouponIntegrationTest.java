@@ -130,8 +130,8 @@ class CouponIntegrationTest {
                 .andExpect(jsonPath("$.content.length()").value(1));
     }
 
-    private Coupon createAndSaveCoupon(String code, String descripion, Double discountValue, LocalDate expirationDate) {
-        Coupon coupon = new Coupon(code, descripion, discountValue, expirationDate);
+    private Coupon createAndSaveCoupon(String code, String description, Double discountValue, LocalDate expirationDate) {
+        Coupon coupon = new Coupon(code, description, discountValue, expirationDate);
         return repository.save(coupon);
     }
 }
