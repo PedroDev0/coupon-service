@@ -14,8 +14,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springdoc.core.annotations.ParameterObject;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -40,9 +43,12 @@ public class CouponController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar cupons ativos", description = "Retorna todos os cupons que NÃO foram deletados (Soft Delete).")
-    public ResponseEntity<List<Coupon>> listAll() {
-        return ResponseEntity.ok(listCoupons.execute());
+    @Operation(summary = "Listar cupons paginados", description = "Retorna cupons ativos com paginação.")
+    public ResponseEntity<Page<Coupon>> listAll(
+            @RequestParam(required = false) String search,
+            @ParameterObject @PageableDefault(size = 10, sort = "expirationDate") Pageable pageable
+    ) {
+        return ResponseEntity.ok(listCoupons.execute(search, pageable));
     }
 
     @DeleteMapping("/{id}")
