@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -26,7 +27,7 @@ public class Coupon {
     private String description;
 
     @Column(nullable = false)
-    private Double discountValue;
+    private BigDecimal discountValue;
 
     @Column(nullable = false)
     private LocalDate expirationDate;
@@ -36,7 +37,7 @@ public class Coupon {
 
     protected Coupon() {}
 
-    public Coupon(String code, String description, Double discountValue, LocalDate expirationDate) {
+    public Coupon(String code, String description, BigDecimal discountValue, LocalDate expirationDate) {
         this.code = validateAndSanitizeCode(code);
         this.description = description;
         this.discountValue = validateDiscount(discountValue);
@@ -57,8 +58,8 @@ public class Coupon {
         return cleanCode;
     }
 
-    private Double validateDiscount(Double value) {
-        if (value == null || value < 0.5) {
+    private BigDecimal validateDiscount(BigDecimal value) {
+        if (value == null || value.compareTo(new BigDecimal("0.5")) < 0) {
             throw new IllegalArgumentException("O valor de desconto mínimo é 0.5");
         }
         return value;

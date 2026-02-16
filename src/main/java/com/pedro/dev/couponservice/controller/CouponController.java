@@ -2,6 +2,7 @@ package com.pedro.dev.couponservice.controller;
 
 import com.pedro.dev.couponservice.domain.Coupon;
 import com.pedro.dev.couponservice.dto.CouponRequest;
+import com.pedro.dev.couponservice.dto.CouponResponse;
 import com.pedro.dev.couponservice.services.CreateCoupon;
 import com.pedro.dev.couponservice.services.DeleteCoupon;
 import com.pedro.dev.couponservice.services.ListCoupons;
@@ -37,18 +38,19 @@ public class CouponController {
             @ApiResponse(responseCode = "201", description = "Cupom criado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos ou regra de negócio violada")
     })
-    public ResponseEntity<Coupon> create(@RequestBody @Valid CouponRequest request) {
+    public ResponseEntity<CouponResponse> create(@RequestBody @Valid CouponRequest request) {
         Coupon createdCoupon = createCoupon.execute(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCoupon);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CouponResponse.from(createdCoupon));
     }
 
     @GetMapping
     @Operation(summary = "Listar cupons paginados", description = "Retorna cupons ativos com paginação.")
-    public ResponseEntity<Page<Coupon>> listAll(
+    public ResponseEntity<Page<CouponResponse>> listAll(
             @RequestParam(required = false) String search,
             @ParameterObject @PageableDefault(size = 10, sort = "expirationDate") Pageable pageable
     ) {
-        return ResponseEntity.ok(listCoupons.execute(search, pageable));
+        Page<CouponResponse> page = listCoupons.execute(search, pageable).map(CouponResponse::from);
+        return ResponseEntity.ok(page);
     }
 
     @DeleteMapping("/{id}")
