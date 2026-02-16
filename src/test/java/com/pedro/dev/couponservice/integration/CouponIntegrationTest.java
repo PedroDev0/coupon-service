@@ -58,8 +58,7 @@ class CouponIntegrationTest {
     @Test
     @DisplayName("Deve retornar erro 400 ao tentar deletar um cupom JÁ DELETADO")
     void shouldReturnBadRequestWhenDeletingAlreadyDeletedCoupon() throws Exception {
-        Coupon coupon = new Coupon("DEL001", "Para Deletar", 5.0, LocalDate.now().plusDays(5));
-        coupon = repository.save(coupon);
+        Coupon coupon = createAndSaveCoupon("DEL001", "Para Deletar", 5.0, LocalDate.now().plusDays(5));
 
         mockMvc.perform(delete("/coupons/" + coupon.getId()))
                 .andExpect(status().isNoContent());
@@ -114,5 +113,25 @@ class CouponIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail").value("O código deve ter exatamente 6 caracteres alfanuméricos após a limpeza."));
+    }
+
+    @Test
+    @DisplayName("Deve filtrar cupons por código ou descrição")
+    void shouldFilterCouponsByName() throws Exception {
+        createAndSaveCoupon("NATAL1", "Descrição Padrão", 10.0,LocalDate.now().plusDays(10));
+
+        mockMvc.perform(get("/coupons?search=NAT"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1) )
+                .andExpect(jsonPath("$.content[0].code").value("NATAL1"));
+
+        mockMvc.perform(get("/coupons?search=padrão"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1));
+    }
+
+    private Coupon createAndSaveCoupon(String code, String descripion, Double discountValue, LocalDate expirationDate) {
+        Coupon coupon = new Coupon(code, descripion, discountValue, expirationDate);
+        return repository.save(coupon);
     }
 }
