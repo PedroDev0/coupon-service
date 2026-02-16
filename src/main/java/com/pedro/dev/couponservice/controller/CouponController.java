@@ -2,7 +2,9 @@ package com.pedro.dev.couponservice.controller;
 
 import com.pedro.dev.couponservice.domain.Coupon;
 import com.pedro.dev.couponservice.dto.CouponRequest;
-import com.pedro.dev.couponservice.service.CouponService;
+import com.pedro.dev.couponservice.services.CreateCoupon;
+import com.pedro.dev.couponservice.services.DeleteCoupon;
+import com.pedro.dev.couponservice.services.ListCoupons;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -22,7 +24,9 @@ import java.util.UUID;
 @Tag(name = "Coupons", description = "Endpoints para gerenciamento de cupons de desconto")
 public class CouponController {
 
-    private final CouponService service;
+    private final CreateCoupon createCoupon;
+    private final ListCoupons listCoupons;
+    private final DeleteCoupon deleteCoupon;
 
     @PostMapping
     @Operation(summary = "Criar novo cupom", description = "Cria um cupom aplicando as regras de sanitização de código e validação de data.")
@@ -31,14 +35,14 @@ public class CouponController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos ou regra de negócio violada")
     })
     public ResponseEntity<Coupon> create(@RequestBody @Valid CouponRequest request) {
-        Coupon createdCoupon = service.create(request);
+        Coupon createdCoupon = createCoupon.execute(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCoupon);
     }
 
     @GetMapping
     @Operation(summary = "Listar cupons ativos", description = "Retorna todos os cupons que NÃO foram deletados (Soft Delete).")
     public ResponseEntity<List<Coupon>> listAll() {
-        return ResponseEntity.ok(service.listAll());
+        return ResponseEntity.ok(listCoupons.execute());
     }
 
     @DeleteMapping("/{id}")
@@ -49,7 +53,7 @@ public class CouponController {
             @ApiResponse(responseCode = "400", description = "Cupom já foi deletado anteriormente")
     })
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        service.delete(id);
+        deleteCoupon.execute(id);
         return ResponseEntity.noContent().build();
     }
 }
