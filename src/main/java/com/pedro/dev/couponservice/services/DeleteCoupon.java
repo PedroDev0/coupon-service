@@ -21,7 +21,7 @@ public class DeleteCoupon {
 
         if (coupon.isPresent()) {
             repository.delete(coupon.get());
-            return; // Sucesso, sai do método.
+            return;
         }
 
         if (repository.isAlreadyDeleted(id)) {

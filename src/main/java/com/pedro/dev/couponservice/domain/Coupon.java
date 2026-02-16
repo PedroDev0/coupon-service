@@ -11,7 +11,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "coupon")
 @Getter
-@SQLDelete(sql = "UPDATE coupons SET deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE coupon SET deleted = true WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class Coupon {
 
