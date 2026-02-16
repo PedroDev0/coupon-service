@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -36,15 +37,18 @@ public class CouponService {
 
     @Transactional
     public void delete(UUID id) {
-        repository.findById(id).ifPresentOrElse(
-                repository::delete,
-                () -> {
-                    if (repository.isAlreadyDeleted(id)) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coupon is already deleted.");
-                    } else {
-                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Coupon not found.");
-                    }
-                }
-        );
+
+        Optional<Coupon> coupon = repository.findById(id);
+
+        if (coupon.isPresent()) {
+            repository.delete(coupon.get());
+            return;
+        }
+
+        if (repository.isAlreadyDeleted(id)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coupon is already deleted.");
+        }
+
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Coupon not found.");
     }
 }
