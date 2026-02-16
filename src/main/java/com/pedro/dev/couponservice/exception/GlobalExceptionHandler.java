@@ -9,9 +9,21 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.net.URI;
 
+/**
+ * Manipulador global de exceções da API REST.
+ *
+ * <p>Intercepta exceções não tratadas nos controllers e as converte em respostas
+ * padronizadas no formato {@link ProblemDetail} (RFC 9457).</p>
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+    /**
+     * Trata exceções de argumento inválido lançadas pelas regras de negócio do domínio.
+     *
+     * @param e exceção contendo a mensagem de violação da regra de negócio
+     * @return {@link ProblemDetail} com status 400 e detalhes do erro
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgumentException(IllegalArgumentException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -22,6 +34,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+    /**
+     * Trata violações de integridade de dados, como tentativa de cadastrar um cupom com código duplicado.
+     *
+     * @param e exceção de violação de integridade lançada pelo banco de dados
+     * @return {@link ProblemDetail} com status 409 e mensagem de conflito
+     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "Já existe um cupom cadastrado com este código.");
